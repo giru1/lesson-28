@@ -29,6 +29,7 @@ urlpatterns = [
     path('cat/<int:pk>/update/', views.CategoryUpdateView.as_view()),
     path('cat/<int:pk>/delete/', views.CategoryDeleteView.as_view()),
     path('ads', include('ads.urls')),
+    path('users', include('users.urls')),
 ]
 
 if settings.DEBUG:

@@ -5,8 +5,8 @@ from django.db import models
 
 class Location(models.Model):
     name = models.CharField(max_length=150)
-    lat = models.FloatField
-    lng = models.FloatField
+    lat = models.DecimalField(decimal_places=4, max_digits=6, null=True)
+    lng = models.DecimalField(decimal_places=4, max_digits=6, null=True)
 
     def __str__(self):
         return self.name
@@ -17,14 +17,22 @@ class Location(models.Model):
 
 
 class User(models.Model):
+    ROLES = [
+        ("member", "Пользователь"),
+        ("moderator", "Модератор"),
+        ("admin", "Админ"),
+    ]
+
+
     first_name = models.CharField(max_length=150)
     last_name = models.CharField(max_length=150)
     username = models.CharField(max_length=150)
     password = models.CharField(max_length=150)
-    role = models.CharField(max_length=50)
-    age = models.IntegerField(max_length=3)
+    role = models.CharField(max_length=50, choices=ROLES, default='member')
+    age = models.IntegerField
     lat = models.FloatField
     lng = models.FloatField
+    location_id = models.ManyToManyField(Location)
 
     def __str__(self):
         return self.username

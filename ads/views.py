@@ -9,7 +9,7 @@ from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import DetailView, ListView, CreateView, UpdateView, DeleteView
 import json
-from ads.models import Category, Ads, User
+from ads.models import Category, Ads
 from bulletin_board import settings
 
 

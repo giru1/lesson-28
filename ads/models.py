@@ -22,7 +22,6 @@ class Ads(models.Model):
     author_id = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     price = models.IntegerField()
     description = models.CharField(max_length=150)
-    address = models.CharField(max_length=150)
     is_published = models.BooleanField(default=False)
     image = models.ImageField(upload_to='ads/', null=True, blank=True)
     category_id = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True)
