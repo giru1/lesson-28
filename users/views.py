@@ -71,30 +71,29 @@ class UserCreateView(CreateView):
     def post(self, request, *args, **kwargs):
         data = json.loads(request.body)
 
-        author_id = get_object_or_404(User, data["author_id"])
-        category_id = get_object_or_404(Category, data["category_id"])
 
-        ads = User.objects.create(
-            name=data["name"],
-            author_id=author_id,
-            price=data["price"],
-            description=data["description"],
-            address=data["address"],
-            is_published=data["is_published"],
-            image=data["image"],
-            category_id=category_id,
+        locations = get_object_or_404(Category, data["category_id"])
+
+        user = User.objects.create(
+            first_name=data['first_name'],
+            last_name=data['last_name'],
+            username=data['username'],
+            password=data['password'],
+            role=data['role'],
+            age=data['age'],
+            locations=locations
         )
 
         return JsonResponse({
-            "id": ads.id,
-            "name": ads.name,
-            "author_id": ads.author_id,
-            "price": ads.price,
-            "description": ads.description,
-            "address": ads.address,
-            "is_published": ads.is_published,
-            "image": ads.image,
-            "category_id": ads.category_id,
+            "id": user.id,
+            "name": user.name,
+            "author_id": user.author_id,
+            "price": user.price,
+            "description": user.description,
+            "address": user.address,
+            "is_published": user.is_published,
+            "image": user.image,
+            "category_id": user.category_id,
         })
 
 

@@ -11,6 +11,7 @@ from django.views.generic import DetailView, ListView, CreateView, UpdateView, D
 import json
 from ads.models import Category, Ads
 from bulletin_board import settings
+from users.models import User
 
 
 def index(request):

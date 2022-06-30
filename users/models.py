@@ -29,10 +29,8 @@ class User(models.Model):
     username = models.CharField(max_length=150)
     password = models.CharField(max_length=150)
     role = models.CharField(max_length=50, choices=ROLES, default='member')
-    age = models.IntegerField
-    lat = models.FloatField
-    lng = models.FloatField
-    location_id = models.ManyToManyField(Location)
+    age = models.PositiveIntegerField()
+    locations = models.ManyToManyField(Location)
 
     def __str__(self):
         return self.username

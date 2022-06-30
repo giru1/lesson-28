@@ -3,7 +3,8 @@ from django.core.management import BaseCommand
 
 # Import the model
 # from children.models import children
-from ads.models import Ads
+from ads.models import Ads, Category
+from users.models import User
 
 ALREDY_LOADED_ERROR_MESSAGE = """
 If you need to reload the child data from the CSV file,
@@ -29,11 +30,17 @@ class Command(BaseCommand):
 
         # Code to load the data into database
         for row in DictReader(open('./datasets/ad.csv', encoding='utf-8')):
-            child = Ads(name=row['name'],
-                        author_id=row['author_id'],
+            author_id = User.objects.get(id=row['author_id'])
+            category_id = Category.objects.get(id=row['category_id'])
+            child = Ads.objects.create(
+                        name=row['name'],
+                        author_id=author_id,
                         price=row['price'],
                         description=row['description'],
                         is_published=row['is_published'].lower().title(),
                         image=row['image'],
-                        category_id=row['category_id'])
-            child.save()
+                        category_id=category_id
+            )
+
+
+            # child.locations.add(locations)

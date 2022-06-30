@@ -3,7 +3,7 @@ from django.core.management import BaseCommand
 
 # Import the model
 # from children.models import children
-from users.models import User
+from users.models import User, Location
 ALREDY_LOADED_ERROR_MESSAGE = """
 If you need to reload the child data from the CSV file,
 first delete the db.sqlite3 file to destroy the database.
@@ -28,13 +28,16 @@ class Command(BaseCommand):
 
         # Code to load the data into database
         for row in DictReader(open('./datasets/user.csv', encoding='utf-8')):
-            child = User(
+            print(row)
+            child = User.objects.create(
                         first_name=row['first_name'],
                         last_name=row['last_name'],
                         username=row['username'],
                         password=row['password'],
                         role=row['role'],
                         age=row['age'],
-                        location_id=row['location_id']
             )
-            child.save()
+            # child.locations.set(Location)
+            # locations = Location.objects.get_or_create(name=row['location_id'])
+            # child.locations.add(locations)
+
