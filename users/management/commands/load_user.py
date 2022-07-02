@@ -28,7 +28,6 @@ class Command(BaseCommand):
 
         # Code to load the data into database
         for row in DictReader(open('./datasets/user.csv', encoding='utf-8')):
-            print(row)
             child = User.objects.create(
                         first_name=row['first_name'],
                         last_name=row['last_name'],
@@ -37,7 +36,7 @@ class Command(BaseCommand):
                         role=row['role'],
                         age=row['age'],
             )
-            # child.locations.set(Location)
+            child.locations.set(Location.objects.filter(id=row['location_id']))
             # locations = Location.objects.get_or_create(name=row['location_id'])
             # child.locations.add(locations)
 
