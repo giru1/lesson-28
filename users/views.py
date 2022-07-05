@@ -28,14 +28,17 @@ class UserListView(ListView):
         page_obj = paginator.get_page(page_number)
 
         ads = []
-        for ad in page_obj:
+        for user in page_obj:
             ads.append({
-                'id': ad.id,
-                'name': ad.name,
-                'author': ad.author,
-                'price': ad.price,
-                'description': ad.description,
-                'address': ad.address,
+                'id': user.id,
+                'first_name': user.first_name,
+                'last_name': user.last_name,
+                'username': user.username,
+                'password': user.password,
+                'role': user.role,
+                'age': user.age,
+                'locations': list(map(str, user.locations.all())),
+
             })
 
         response = {
@@ -50,16 +53,17 @@ class UserDetailView(DetailView):
     model = User
 
     def get(self, request, *args, **kwargs):
-        ads = self.get_object()
+        user = self.get_object()
 
         return JsonResponse({
-            "id": ads.id,
-            "name": ads.name,
-            "author": ads.author,
-            "price": ads.price,
-            "description": ads.description,
-            "address": ads.address,
-            "is_published": ads.is_published,
+            'id': user.id,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'username': user.username,
+            'password': user.password,
+            'role': user.role,
+            'age': user.age,
+            'locations': list(map(str, user.locations.all())),
         })
 
 
@@ -85,15 +89,14 @@ class UserCreateView(CreateView):
         )
 
         return JsonResponse({
-            "id": user.id,
-            "name": user.name,
-            "author_id": user.author_id,
-            "price": user.price,
-            "description": user.description,
-            "address": user.address,
-            "is_published": user.is_published,
-            "image": user.image,
-            "category_id": user.category_id,
+            'id': user.id,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'username': user.username,
+            'password': user.password,
+            'role': user.role,
+            'age': user.age,
+            'locations': list(map(str, user.locations.all())),
         })
 
 

@@ -1,14 +1,13 @@
+import json
+
 from django.core.paginator import Paginator
 from django.http import JsonResponse
-from django.shortcuts import render, get_object_or_404
-
+from django.shortcuts import get_object_or_404
 # Create your views here.
-from django.template.context_processors import csrf
 from django.utils.decorators import method_decorator
-from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import DetailView, ListView, CreateView, UpdateView, DeleteView
-import json
+
 from ads.models import Category, Ads
 from bulletin_board import settings
 from users.models import User
@@ -16,19 +15,17 @@ from users.models import User
 
 def index(request):
     return JsonResponse({
-        "status": "ok"
+        "status": "ok 200"
     })
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class AdsListView(ListView):
     model = Ads
 
+
     def get(self, request, *args, **kwargs):
         super().get(request, *args, **kwargs)
-
-        search_text = request.GET.get('search_text', None)
-        if search_text:
-            self.object_list = self.object_list.filter(text=search_text)
 
         paginator = Paginator(self.object_list, settings.TOTAL_0N_PAGE)
         page_number = request.GET.get('page')
@@ -36,13 +33,15 @@ class AdsListView(ListView):
 
         ads = []
         for ad in page_obj:
+            print(ads)
             ads.append({
-                'id': ad.id,
-                'name': ad.name,
-                'author': ad.author,
-                'price': ad.price,
-                'description': ad.description,
-                'address': ad.address,
+                "id": ad.id,
+                "name": ad.name,
+                "price": ad.price,
+                "description": ad.description,
+                "author_id": ad.author_id,
+                "is_published": ad.is_published,
+                "image": ad.image.url if ad.image else None,
             })
 
         response = {
@@ -53,6 +52,7 @@ class AdsListView(ListView):
         return JsonResponse(response, safe=False)
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class AdsDetailView(DetailView):
     model = Ads
 
@@ -62,11 +62,12 @@ class AdsDetailView(DetailView):
         return JsonResponse({
             "id": ads.id,
             "name": ads.name,
-            "author": ads.author,
+            "author_id": ads.author_id,
             "price": ads.price,
             "description": ads.description,
-            "address": ads.address,
             "is_published": ads.is_published,
+            "image": ads.image.url if ads.image else None,
+            "category_id": ads.category_id,
         })
 
 
@@ -176,7 +177,7 @@ class AdsImageView(UpdateView):
 
 # ////////////////
 
-
+@method_decorator(csrf_exempt, name='dispatch')
 class CategoryListView(ListView):
     model = Category
 
@@ -196,6 +197,7 @@ class CategoryListView(ListView):
         return JsonResponse(response, safe=False)
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class CategoryDetailView(DetailView):
     model = Category
 
@@ -246,6 +248,7 @@ class CategoryUpdateView(UpdateView):
         })
 
 
+@method_decorator(csrf_exempt, name='dispatch')
 class CategoryDeleteView(DeleteView):
     model = Category
     success_url = "/"
