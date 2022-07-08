@@ -6,7 +6,7 @@ from django.shortcuts import render, get_object_or_404
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import DetailView, CreateView, UpdateView, DeleteView, ListView
-
+from django.db.models import Count
 from ads.models import Category
 from bulletin_board import settings
 from users.models import User, Location
@@ -15,13 +15,13 @@ import json
 
 class UserListView(ListView):
     model = User
+    queryset = User.objects.all()
 
     def get(self, request, *args, **kwargs):
         super().get(request, *args, **kwargs)
 
-        search_text = request.GET.get('search_text', None)
-        if search_text:
-            self.object_list = self.object_list.filter(text=search_text)
+        self.object_list = self.object_list.order_by('username')
+        self.object_list = self.object_list.annotate(count_ads=Count('ads'))
 
         paginator = Paginator(self.object_list, settings.TOTAL_0N_PAGE)
         page_number = request.GET.get('page')
@@ -38,13 +38,13 @@ class UserListView(ListView):
                 'role': user.role,
                 'age': user.age,
                 'locations': list(map(str, user.locations.all())),
-
+                'count_ads': user.count_ads
             })
 
         response = {
             'items': ads,
             'num_page': paginator.num_pages,
-            'total': paginator.count
+            'total': paginator.count,
         }
         return JsonResponse(response, safe=False)
 
@@ -70,13 +70,10 @@ class UserDetailView(DetailView):
 @method_decorator(csrf_exempt, name='dispatch')
 class UserCreateView(CreateView):
     model = User
-    fields = ['name', 'author_id', 'price', 'description', 'address', 'is_published', 'image', 'category_id']
+    fields = ['first_name', 'last_name', 'username', 'password', 'role', 'age', 'locations']
 
     def post(self, request, *args, **kwargs):
         data = json.loads(request.body)
-
-
-        locations = get_object_or_404(Category, data["category_id"])
 
         user = User.objects.create(
             first_name=data['first_name'],
@@ -85,8 +82,10 @@ class UserCreateView(CreateView):
             password=data['password'],
             role=data['role'],
             age=data['age'],
-            locations=locations
         )
+        for location_name in data["locations"]:
+            location, _ = Location.objects.get_or_create(name=location_name)
+            user.locations.add(location)
 
         return JsonResponse({
             'id': user.id,
@@ -103,34 +102,35 @@ class UserCreateView(CreateView):
 @method_decorator(csrf_exempt, name='dispatch')
 class UserUpdateView(UpdateView):
     model = User
-    fields = ['name', 'author_id', 'price', 'description', 'address', 'is_published', 'image', 'category_id']
+    fields = ['first_name', 'last_name', 'username', 'password', 'role', 'age', 'locations']
 
     def post(self, request, *args, **kwargs):
         super().post(request, *args, **kwargs)
 
         data = json.loads(request.body)
 
-        self.objects.name = data["name"]
-        self.object.author_id = get_object_or_404(User, data["author_id"])
-        self.objects.price = data["price"]
-        self.objects.description = data["description"]
-        self.objects.address = data["address"]
-        self.objects.is_published = data["is_published"]
-        self.objects.image = data["image"]
-        self.object.category_id = get_object_or_404(Category, data["category_id"])
+        self.object.first_name = data["first_name"]
+        self.object.last_name = data["last_name"]
+        self.object.username = data["username"]
+        self.object.password = data["password"]
+        self.object.role = data["role"]
+        self.object.age = data["age"]
+
+        for location_name in data["locations"]:
+            location, _ = Location.objects.get_or_create(name=location_name)
+            self.object.locations.add(location)
 
         self.object.save()
 
         return JsonResponse({
-            "id": self.objects.id,
-            "name": self.objects.name,
-            "author_id": self.objects.author_id,
-            "price": self.objects.price,
-            "description": self.objects.description,
-            "address": self.objects.address,
-            "is_published": self.objects.is_published,
-            "image": self.objects.image,
-            "category_id": self.objects.category_id,
+            "id": self.object.id,
+            "first_name": self.object.first_name,
+            "last_name": self.object.last_name,
+            "username": self.object.username,
+            "password": self.object.password,
+            "role": self.object.role,
+            "age": self.object.age,
+            "locations": list(map(str, self.object.locations.all()))
         })
 
 
@@ -140,6 +140,6 @@ class UserDeleteView(DeleteView):
     success_url = "/"
 
     def delete(self, request, *args, **kwargs):
-        super().post(request, *args, **kwargs)
+        super().delete(request, *args, **kwargs)
 
         return JsonResponse({"status": "ok"}, status=200)
