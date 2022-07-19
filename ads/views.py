@@ -9,6 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.views.generic import DetailView, ListView, CreateView, UpdateView, DeleteView
 
 from ads.models import Category, Ads
+from ads.serializers import AdsListSerializer
 from bulletin_board import settings
 from users.models import User
 
@@ -33,20 +34,8 @@ class AdsListView(ListView):
         page_number = request.GET.get('page')
         page_obj = paginator.get_page(page_number)
 
-        ads = []
-        for ad in page_obj:
-            ads.append({
-                "id": ad.id,
-                "name": ad.name,
-                "price": ad.price,
-                "description": ad.description,
-                "author_id": ad.author_id,
-                "is_published": ad.is_published,
-                "image": ad.image.url if ad.image else None,
-            })
-
         response = {
-            'items': ads,
+            'items': AdsListSerializer(page_obj, many=True).data,
             'num_page': paginator.num_pages,
             'total': paginator.count
         }
